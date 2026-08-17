@@ -7,8 +7,7 @@ const { Contact, ContactNote, ContactStatus, ContactSource } = require('../../mo
 const { protect } = require('../../middleware/auth.middleware');
 
 router.use(protect);
-const upload = multer({ dest: 'uploads/tmp/' });
-
+const upload = multer({ dest: process.env.VERCEL ? '/tmp/uploads/' : 'uploads/tmp/' });
 // ── Statuses & Sources ────────────────────────────────────────
 router.get('/statuses',          async (req, res) => res.json(await ContactStatus.find().sort('name')));
 router.post('/statuses',         async (req, res) => { try { res.status(201).json(await ContactStatus.create(req.body)); } catch(e){ res.status(400).json({error:e.message}); }});
