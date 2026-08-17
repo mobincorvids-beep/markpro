@@ -7,8 +7,7 @@ const { protect } = require('../../middleware/auth.middleware');
 const wa = require('../../utils/whatsapp');
 
 router.use(protect);
-const upload = multer({ dest: 'uploads/whatsapp-attachments/' });
-
+const upload = multer({ dest: process.env.VERCEL ? '/tmp/whatsapp-attachments/' : 'uploads/whatsapp-attachments/' });
 // ── Chat list ─────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
