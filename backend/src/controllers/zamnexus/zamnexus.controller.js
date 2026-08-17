@@ -492,8 +492,7 @@ exports.uploadAsset = async (req, res) => {
   try {
     if (!req.files?.file) return res.status(400).json({ success: false, message: 'File required' });
     const file = req.files.file;
-    const dir  = path.join(__dirname, '../../../uploads/zam-assets');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+const dir  = process.env.VERCEL ? path.join('/tmp', 'zam-assets') : path.join(__dirname, '../../../uploads/zam-assets');    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     const fname = `${Date.now()}-${Math.random().toString(36).slice(2)}${path.extname(file.name)}`;
     await file.mv(path.join(dir, fname));
     const type = file.mimetype.startsWith('image') ? 'image' : file.mimetype.startsWith('video') ? 'video' : file.mimetype.startsWith('audio') ? 'audio' : 'document';

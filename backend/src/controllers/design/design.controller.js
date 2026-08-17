@@ -54,7 +54,7 @@ exports.saveThumbnail = async (req, res) => {
     if (!thumbnail) return res.status(400).json({ success: false, message: 'No thumbnail provided' });
     const base64Data = thumbnail.replace(/^data:image\/\w+;base64,/, '');
     const buf  = Buffer.from(base64Data, 'base64');
-    const dir  = path.join(__dirname, '../../../uploads/designs');
+    const dir  = process.env.VERCEL ? path.join('/tmp', 'designs') : path.join(__dirname, '../../../uploads/designs');
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     const fname = `thumb_${req.params.id}_${Date.now()}.jpg`;
     fs.writeFileSync(path.join(dir, fname), buf);

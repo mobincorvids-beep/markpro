@@ -34,7 +34,7 @@ exports.generateDalleImage = async ({ prompt, n = 1 }) => {
   const result = await gemini.generateImage({ prompt, n: parseInt(n) });
   if (result.error) throw new Error(result.message);
 
-  const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'images');
+  const uploadDir = process.env.VERCEL ? path.join('/tmp', 'images') : path.join(__dirname, '..', '..', 'uploads', 'images');
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
   const urls = [];
@@ -96,7 +96,7 @@ exports.generateGoogleTTS = async ({ text, voice_name = 'en-US-Standard-A', lang
     audioConfig: { audioEncoding: 'MP3', speakingRate: parseFloat(speaking_rate), pitch: parseFloat(pitch) },
   });
 
-  const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'audio');
+  const uploadDir = process.env.VERCEL ? path.join('/tmp', 'audio') : path.join(__dirname, '..', '..', 'uploads', 'audio');
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
   const filename = `${crypto.randomBytes(8).toString('hex')}.mp3`;

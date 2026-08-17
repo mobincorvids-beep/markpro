@@ -281,7 +281,7 @@ exports.uploadMedia = async (req, res) => {
   try {
     if (!req.files?.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
     const file = req.files.file;
-    const dir  = path.join(__dirname, '../../../uploads/sp-media');
+    const dir  = process.env.VERCEL ? path.join('/tmp', 'sp-media') : path.join(__dirname, '../../../uploads/sp-media');
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     const fname = `${Date.now()}-${Math.random().toString(36).slice(2)}${path.extname(file.name)}`;
     await file.mv(path.join(dir, fname));

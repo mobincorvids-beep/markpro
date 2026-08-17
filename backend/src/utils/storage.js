@@ -33,7 +33,7 @@ async function downloadBuffer(url) {
 function buildLocalPath(ext = 'png') {
   const year  = new Date().getFullYear();
   const month = String(new Date().getMonth() + 1).padStart(2, '0');
-  const dir   = path.join(__dirname, '..', 'uploads', String(year), month);
+  const dir   = process.env.VERCEL ? path.join('/tmp', String(year), month) : path.join(__dirname, '..', 'uploads', String(year), month);
   fs.mkdirSync(dir, { recursive: true });
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
   return { dir, filename, urlPath: `/uploads/${year}/${month}/${filename}` };

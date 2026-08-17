@@ -15,9 +15,10 @@ const AccountNotification = require('../models/AccountNotification.model');
 const User = require('../models/User.model');
 
 /* ── avatar upload storage ─────────────────────────────────────────────── */
-const avatarDir = path.join(__dirname, '..', '..', 'uploads', 'avatars');
+const avatarDir = process.env.VERCEL
+  ? path.join('/tmp', 'avatars')
+  : path.join(__dirname, '..', '..', 'uploads', 'avatars');
 if (!fs.existsSync(avatarDir)) fs.mkdirSync(avatarDir, { recursive: true });
-
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => cb(null, avatarDir),
