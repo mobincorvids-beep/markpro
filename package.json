@@ -1,0 +1,24 @@
+{
+  "name": "markpro",
+  "version": "6.0.0",
+  "description": "MarkPro, a unified marketing platform (24 modules): Express + MongoDB API and a React SPA.",
+  "scripts": {
+    "setup": "npm run install:all && npm run env:init",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "env:init": "node scripts/init-env.js",
+    "dev": "concurrently -n api,web -c magenta,cyan \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "cd frontend && npm install && npm run build",
+    "start": "NODE_ENV=production node backend/src/server.js",
+    "test": "cd backend && node tests/smoke.test.js",
+    "seed": "cd backend && node scripts/seed.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
