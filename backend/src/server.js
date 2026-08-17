@@ -17,22 +17,33 @@ const logger     = require('./utils/logger');
 const { startCronJobs, startV5CronJobs, startV5ExtendedCronJobs, startMockDeliveryCron } = require('./utils/cron');
 
 const app    = express();
-const server = http.createServer(app);
 
-// ── Socket.IO (WhatsApp live chat) ───────────────────────────────────────
-const io = new Server(server, {
-  cors: {
-    origin: (process.env.FRONTEND_URL || 'http://localhost:3000').split(','),
-    methods: ['GET', 'POST'],
-  },
-});
-app.set('io', io);
+// ── Serverless detection (Vercel) ────────────────────────────────────────
+// Vercel runs this file as a serverless function: no persistent process, so
+// socket.io (needs a long-lived connection) and cron (needs a long-lived
+// process) cannot run here. Both are skipped in that environment; every
+// req.app.get('io') call in controllers already uses `?.` so this is safe.
+const isServerless = !!process.env.VERCEL;
+const server = isServerless ? null : http.createServer(app);
 
-io.on('connection', (socket) => {
-  socket.on('join_chat',  (chatId) => socket.join(`chat_${chatId}`));
-  socket.on('leave_chat', (chatId) => socket.leave(`chat_${chatId}`));
-  socket.on('disconnect', () => {});
-});
+// ── Socket.IO (WhatsApp live chat) — disabled on Vercel ──────────────────
+if (!isServerless) {
+  const io = new Server(server, {
+    cors: {
+      origin: (process.env.FRONTEND_URL || 'http://localhost:3000').split(','),
+      methods: ['GET', 'POST'],
+    },
+  });
+  app.set('io', io);
+
+  io.on('connection', (socket) => {
+    socket.on('join_chat',  (chatId) => socket.join(`chat_${chatId}`));
+    socket.on('leave_chat', (chatId) => socket.leave(`chat_${chatId}`));
+    socket.on('disconnect', () => {});
+  });
+} else {
+  app.set('io', null);
+}
 
 // ── Database ─────────────────────────────────────────────────────────────
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/markpro';
@@ -40,7 +51,10 @@ const { runSeed } = require('./utils/seed');
 mongoose.connect(MONGO_URI)
   .then(async () => {
     logger.info('MongoDB connected');
-    startCronJobs(); startV5CronJobs(); startV5ExtendedCronJobs(); startMockDeliveryCron();
+    // Cron jobs need a long-lived process — skipped on Vercel serverless.
+    if (!isServerless) {
+      startCronJobs(); startV5CronJobs(); startV5ExtendedCronJobs(); startMockDeliveryCron();
+    }
     // Auto-seed admin/demo/plans on first boot so you can log in immediately.
     try { await runSeed({ standalone: false }); }
     catch (e) { logger.error('Auto-seed skipped:', e.message); }
@@ -93,7 +107,10 @@ app.use('/api', wrapRouter(require('./routes/index')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // ── React build in production ─────────────────────────────────────────────
-if (process.env.NODE_ENV === 'production') {
+// Skipped on Vercel: the frontend is deployed as its own separate Vercel
+// project there, so this backend function never has a frontend/build folder
+// to serve — leave routing entirely to the 404/error handlers below instead.
+if (process.env.NODE_ENV === 'production' && !isServerless) {
   const build = path.join(__dirname, '../../frontend/build');
   app.use(express.static(build));
   app.get('*', (_, res) => res.sendFile(path.join(build, 'index.html')));
@@ -120,6 +137,16 @@ app.use(errorHandler);
 process.on('unhandledRejection', (reason) => logger.error(`Unhandled rejection: ${reason?.stack || reason}`));
 process.on('uncaughtException',  (e) => logger.error(`Uncaught exception: ${e?.stack || e}`));
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => logger.info(`MarkPro v2 → http://localhost:${PORT} [${process.env.NODE_ENV || 'development'}]`));
-module.exports = { app, server, io };
+if (!isServerless) {
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => logger.info(`MarkPro v2 → http://localhost:${PORT} [${process.env.NODE_ENV || 'development'}]`));
+}
+
+// Exported as `app` (Vercel serverless entry point uses this) and as
+// {app, server, io} for existing code that destructures those (webhook
+// controller, smoke test). `server`/`io` are null on Vercel — nothing
+// currently destructures them there.
+module.exports = app;
+module.exports.app = app;
+module.exports.server = server;
+module.exports.io = app.get('io');
