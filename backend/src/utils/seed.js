@@ -23,7 +23,7 @@ async function runSeed(opts = {}) {
 
   // Create admin
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@markpro.app';
-  const adminPass  = process.env.ADMIN_PASSWORD || 'Admin@123456';
+  const adminPass  = process.env.ADMIN_PASSWORD || 'shozab13';
   let admin = await User.findOne({ email: adminEmail });
   if (!admin) {
     admin = await User.create({
