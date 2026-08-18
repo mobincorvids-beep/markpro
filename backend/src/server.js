@@ -48,7 +48,31 @@ if (!isServerless) {
 // ── Database ─────────────────────────────────────────────────────────────
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/markpro';
 const { runSeed } = require('./utils/seed');
-mongoose.connect(MONGO_URI)
+
+// Serverless-safe connection. Vercel freezes/thaws this module between
+// invocations, and MongoDB Atlas drops idle connections out from under us —
+// that surfaces as "MongoDB error: read ECONNRESET" on whatever request
+// happens to hit it next (this broke admin login, but it's not specific to
+// login — any route can land on a stale connection). Cache the connect()
+// promise across invocations and re-establish it on demand instead of
+// relying on the one-shot connect() below still being valid by the time a
+// request arrives.
+let mongoReady = null;
+function ensureMongoConnected() {
+  if (mongoose.connection.readyState === 1) return Promise.resolve();
+  if (!mongoReady) {
+    mongoReady = mongoose.connect(MONGO_URI, {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    }).catch(err => { mongoReady = null; throw err; });
+  }
+  return mongoReady;
+}
+mongoose.connection.on('disconnected', () => { mongoReady = null; });
+mongoose.connection.on('error', () => { mongoReady = null; });
+
+ensureMongoConnected()
   .then(async () => {
     logger.info('MongoDB connected');
     // Cron jobs need a long-lived process — skipped on Vercel serverless.
@@ -101,6 +125,19 @@ app.use(require('./middleware/envelope.middleware'));
 // wrapRouter (Section B.8) forwards any escaped async rejection to the
 // terminal error handler below instead of hanging the request.
 const { wrapRouter } = require('./utils/wrapRouter');
+// ── DB reconnect guard ──────────────────────────────────────────────────
+// Cheap no-op once connected. On a thawed serverless instance whose
+// connection was dropped, this awaits a fresh one before any route handler
+// touches the DB — instead of the request failing mid-query with ECONNRESET
+// and bubbling up as a generic 500 (e.g. "Login failed").
+app.use(async (req, res, next) => {
+  try { await ensureMongoConnected(); next(); }
+  catch (err) {
+    logger.error('MongoDB reconnect failed:', err.message);
+    res.status(503).json({ success: false, error: 'Database temporarily unavailable — please try again.' });
+  }
+});
+
 app.use('/api', wrapRouter(require('./routes/index')));
 
 // ── Static uploads ────────────────────────────────────────────────────────
