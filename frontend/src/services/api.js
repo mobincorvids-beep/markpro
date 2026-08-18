@@ -422,7 +422,182 @@ export const penAPI = {
   removeTeamMember: id      => api.delete(`/pen/team/${id}`),
 };
 
+//  Bio Pages — Admin 
+export const bioAdminAPI = {
+  getAnalytics:      ()      => api.get('/bio/admin/analytics'),
+  getUsers:          p       => api.get('/bio/admin/users', { params: p }),
+  updateUserStatus:  d       => api.put('/bio/admin/users/status', d),
+  updateUser:        d       => api.put('/bio/admin/users/update', d),
+  deleteUser:        id      => api.delete(`/bio/admin/users/${id}`),
+  assignPlan:        d       => api.post('/bio/admin/users/assign-plan', d),
+  getCampaigns:      p       => api.get('/bio/admin/campaigns', { params: p }),
+  getPlans:          ()      => api.get('/bio/admin/plans'),
+  createPlan:        d       => api.post('/bio/admin/plans', d),
+  updatePlanStatus:  d       => api.put('/bio/admin/plans/status', d),
+  deletePlan:        id      => api.delete(`/bio/admin/plans/${id}`),
+  getTemplates:      ()      => api.get('/bio/admin/templates'),
+  createTemplate:    d       => api.post('/bio/admin/templates', d),
+  saveTemplate:      d       => api.put('/bio/admin/templates', d),
+  updateTemplateStatus: d    => api.put('/bio/admin/templates/status', d),
+  deleteTemplate:    id      => api.delete(`/bio/admin/templates/${id}`),
+  getCategories:     ()      => api.get('/bio/admin/categories'),
+  saveCategory:      d       => api.post('/bio/admin/categories', d),
+  updateCategoryStatus: d    => api.put('/bio/admin/categories/status', d),
+  deleteCategory:    id      => api.delete(`/bio/admin/categories/${id}`),
+  getThemes:         ()      => api.get('/bio/admin/themes'),
+  addTheme:          d       => api.post('/bio/admin/themes', d),
+  editTheme:         d       => api.put('/bio/admin/themes', d),
+  updateThemeStatus: d       => api.put('/bio/admin/themes/status', d),
+  deleteTheme:       id      => api.delete(`/bio/admin/themes/${id}`),
+  getSocialTypes:    ()      => api.get('/bio/admin/social-types'),
+  addSocialType:     d       => api.post('/bio/admin/social-types', d),
+  deleteSocialType:  id      => api.delete(`/bio/admin/social-types/${id}`),
+  getSettings:       ()      => api.get('/bio/admin/settings'),
+  updateSettings:    d       => api.put('/bio/admin/settings', d),
+  updateEmailSettings: d     => api.put('/bio/admin/settings/email', d),
+  getCoupons:        ()      => api.get('/bio/admin/coupons'),
+  addCoupon:         d       => api.post('/bio/admin/coupons', d),
+  updateCouponStatus:d       => api.put('/bio/admin/coupons/status', d),
+  deleteCoupon:      id      => api.delete(`/bio/admin/coupons/${id}`),
+  getPendingPayments:()      => api.get('/bio/admin/payments/pending'),
+  updatePaymentStatus:d      => api.put('/bio/admin/payments/status', d),
+};
+
+//  BioLinks — Admin 
+export const blAdminAPI = {
+  getStats:          ()      => api.get('/biolinks/admin/stats'),
+  getUsers:          p       => api.get('/biolinks/admin/users', { params: p }),
+  getUser:           id      => api.get(`/biolinks/admin/users/${id}`),
+  createUser:        d       => api.post('/biolinks/admin/users', d),
+  updateUser:        (id,d)  => api.put(`/biolinks/admin/users/${id}`, d),
+  deleteUser:        id      => api.delete(`/biolinks/admin/users/${id}`),
+  updateUserStatus:  (id,d)  => api.patch(`/biolinks/admin/users/${id}/status`, d),
+  assignPlan:        (id,d)  => api.post(`/biolinks/admin/users/${id}/assign-plan`, d),
+  getPlans:          ()      => api.get('/biolinks/admin/plans'),
+  createPlan:        d       => api.post('/biolinks/admin/plans', d),
+  updatePlan:        (id,d)  => api.put(`/biolinks/admin/plans/${id}`, d),
+  deletePlan:        id      => api.delete(`/biolinks/admin/plans/${id}`),
+  getThemes:         ()      => api.get('/biolinks/admin/themes'),
+  createTheme:       d       => api.post('/biolinks/admin/themes', d),
+  updateTheme:       (id,d)  => api.put(`/biolinks/admin/themes/${id}`, d),
+  deleteTheme:       id      => api.delete(`/biolinks/admin/themes/${id}`),
+  getTemplates:      ()      => api.get('/biolinks/admin/templates'),
+  createTemplate:    d       => api.post('/biolinks/admin/templates', d),
+  updateTemplate:    (id,d)  => api.put(`/biolinks/admin/templates/${id}`, d),
+  deleteTemplate:    id      => api.delete(`/biolinks/admin/templates/${id}`),
+  getTemplateCategories: ()  => api.get('/biolinks/admin/template-categories'),
+  createTemplateCategory: d  => api.post('/biolinks/admin/template-categories', d),
+  deleteTemplateCategory: id => api.delete(`/biolinks/admin/template-categories/${id}`),
+  getSettings:       ()      => api.get('/biolinks/admin/settings'),
+  updateSettings:    d       => api.put('/biolinks/admin/settings', d),
+  getPayments:       p       => api.get('/biolinks/admin/payments', { params: p }),
+  getCodes:          ()      => api.get('/biolinks/admin/codes'),
+  createCode:        d       => api.post('/biolinks/admin/codes', d),
+  updateCode:        (id,d)  => api.put(`/biolinks/admin/codes/${id}`, d),
+  deleteCode:        id      => api.delete(`/biolinks/admin/codes/${id}`),
+  getDomains:        ()      => api.get('/biolinks/admin/domains'),
+  createDomain:      d       => api.post('/biolinks/admin/domains', d),
+  deleteDomain:      id      => api.delete(`/biolinks/admin/domains/${id}`),
+};
+
+//  Pen AI — Admin 
+export const penAdminAPI = {
+  getStats:          ()      => api.get('/pen/admin/stats'),
+  getUsers:          p       => api.get('/pen/admin/users', { params: p }),
+  createUser:        d       => api.post('/pen/admin/users', d),
+  updateUser:        (id,d)  => api.put(`/pen/admin/users/${id}`, d),
+  deleteUser:        id      => api.delete(`/pen/admin/users/${id}`),
+  updateUserStatus:  (id,d)  => api.patch(`/pen/admin/users/${id}/status`, d),
+  assignPackage:     (id,d)  => api.post(`/pen/admin/users/${id}/package`, d),
+  addCredits:        (id,d)  => api.post(`/pen/admin/users/${id}/credits`, d),
+  getPackages:       ()      => api.get('/pen/admin/packages'),
+  createPackage:     d       => api.post('/pen/admin/packages', d),
+  updatePackage:     (id,d)  => api.put(`/pen/admin/packages/${id}`, d),
+  deletePackage:     id      => api.delete(`/pen/admin/packages/${id}`),
+  getGroups:         ()      => api.get('/pen/admin/groups'),
+  createGroup:       d       => api.post('/pen/admin/groups', d),
+  updateGroup:       (id,d)  => api.put(`/pen/admin/groups/${id}`, d),
+  deleteGroup:       id      => api.delete(`/pen/admin/groups/${id}`),
+  getTemplates:      ()      => api.get('/pen/admin/templates'),
+  createTemplate:    d       => api.post('/pen/admin/templates', d),
+  updateTemplate:    (id,d)  => api.put(`/pen/admin/templates/${id}`, d),
+  deleteTemplate:    id      => api.delete(`/pen/admin/templates/${id}`),
+  getSettings:       ()      => api.get('/pen/admin/settings'),
+  updateSettings:    d       => api.put('/pen/admin/settings', d),
+  getOrders:         p       => api.get('/pen/admin/orders', { params: p }),
+};
+
 export default api;
+
+//  ChatFlow — Admin 
+export const chatflowAdminAPI = {
+  getStats:          ()      => api.get('/chatflow/admin/stats'),
+  getTenants:        p       => api.get('/chatflow/admin/tenants', { params: p }),
+  suspendTenant:     (id,d)  => api.put(`/chatflow/admin/tenants/${id}/suspend`, d),
+};
+
+//  Design Studio — Admin 
+export const designAdminAPI = {
+  getStats:          ()      => api.get('/design/admin/stats'),
+  createTemplate:    d       => api.post('/design/templates', d),
+  updateTemplate:    (id,d)  => api.put(`/design/templates/${id}`, d),
+  deleteTemplate:    id      => api.delete(`/design/templates/${id}`),
+};
+
+//  SiteSpy — Admin 
+export const sitespyAdminAPI = {
+  getStats:          ()      => api.get('/sitespy/admin/stats'),
+};
+
+//  StackPosts — Admin 
+export const stackpostsAdminAPI = {
+  getStats:          ()      => api.get('/sp/admin/stats'),
+  getTickets:        p       => api.get('/sp/admin/tickets', { params: p }),
+  replyTicket:       (id,d)  => api.post(`/sp/admin/tickets/${id}/reply`, d),
+  getWithdrawals:    p       => api.get('/sp/admin/withdrawals', { params: p }),
+  updateWithdrawal:  (id,d)  => api.put(`/sp/admin/withdrawals/${id}`, d),
+  createBlog:        d       => api.post('/sp/admin/blog', d),
+  updateBlog:        (id,d)  => api.put(`/sp/admin/blog/${id}`, d),
+  deleteBlog:        id      => api.delete(`/sp/admin/blog/${id}`),
+  getAiTemplates:    ()      => api.get('/sp/admin/ai-templates'),
+  createAiTemplate:  d       => api.post('/sp/admin/ai-templates', d),
+};
+
+//  Teleman — Admin 
+export const telemanAdminAPI = {
+  getStats:          ()      => api.get('/teleman/admin/stats'),
+};
+
+//  ToolsAI — Admin 
+export const toolsaiAdminAPI = {
+  getStats:          ()      => api.get('/toolsai/admin/stats'),
+  createBlog:        d       => api.post('/toolsai/admin/blog', d),
+  updateBlog:        (id,d)  => api.put(`/toolsai/admin/blog/${id}`, d),
+  deleteBlog:        id      => api.delete(`/toolsai/admin/blog/${id}`),
+  createTemplate:    d       => api.post('/toolsai/admin/templates', d),
+  updateTemplate:    (id,d)  => api.put(`/toolsai/admin/templates/${id}`, d),
+};
+
+//  WhatsML — Admin 
+export const whatsmlAdminAPI = {
+  getStats:          ()      => api.get('/whatsml/admin/stats'),
+};
+
+//  ZAM Nexus — Admin 
+export const zamAdminAPI = {
+  getStats:          ()      => api.get('/zam/admin/stats'),
+};
+
+//  SEO Manager — Admin 
+export const seoManagerAdminAPI = {
+  getStats:          ()      => api.get('/seo-manager/admin/stats'),
+};
+
+//  WhatsApp — global settings (admin) 
+export const whatsappAdminAPI = {
+  getSettings:       ()      => api.get('/whatsapp/settings'),
+  updateSettings:    d       => api.put('/whatsapp/settings', d),
+};
 
 //  Design Studio (PixaGuru) 
 export const designAPI = {

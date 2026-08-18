@@ -209,6 +209,77 @@ function SignInForm({ onSwitch }) {
         New to MarkPro?{' '}
         <button type="button" className="auth2-alt-link" onClick={() => onSwitch('register')}>Sign up for an account</button>
       </p>
+      <p className="auth2-alt" style={{ marginTop: 4 }}>
+        <Link to="/admin-login" className="auth2-mini-link">Administrator sign in →</Link>
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Admin-only sign-in. Same /auth/login endpoint as the regular form — the
+ * server has one login for everyone — but this screen refuses to proceed
+ * for anyone whose account role isn't admin/staff, so it only ever lands on
+ * the admin dashboard and never leaks into the regular user experience.
+ */
+function AdminSignInForm() {
+  const { login, logout } = useAuth();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [reveal, setReveal] = useState(false);
+
+  const submit = async e => {
+    e.preventDefault();
+    setError('');
+    if (!form.email || !form.password) return setError('Please enter your admin email and password.');
+    setBusy(true);
+    try {
+      const user = await login(form.email.trim(), form.password);
+      if (user?.role !== 'admin' && user?.role !== 'staff') {
+        await logout();
+        setError('This account does not have administrator access.');
+        return;
+      }
+      navigate('/admin', { replace: true });
+    } catch (err) {
+      setError(errorText(err, 'Could not sign you in. Check your email and password.'));
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="auth2-panel">
+      <h2 className="auth2-title">Administrator sign in</h2>
+      <p className="auth2-sub">Restricted access — for MarkPro staff and administrators only.</p>
+      <Alert>{error}</Alert>
+      <form onSubmit={submit} noValidate>
+        <div className="stitch-field">
+          <label className="stitch-field-lbl">ADMIN EMAIL</label>
+          <div className="stitch-input-wrap">
+            <div className="stitch-input-icon"><Mail size={16} /></div>
+            <input type="email" placeholder="admin@company.com" value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })} autoFocus />
+          </div>
+        </div>
+        <div className="stitch-field">
+          <label className="stitch-field-lbl">PASSWORD</label>
+          <div className="stitch-input-wrap">
+            <div className="stitch-input-icon"><Lock size={16} /></div>
+            <input type={reveal ? 'text' : 'password'} placeholder="••••••••" value={form.password}
+              onChange={e => setForm({ ...form, password: e.target.value })} />
+            <button type="button" onClick={() => setReveal(v => !v)} className="auth2-reveal">
+              {reveal ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
+        <button type="submit" className="stitch-submit-btn" disabled={busy}>
+          {busy ? (<><Loader2 size={17} className="auth2-spin" /> Signing in...</>) : (<>Sign in to admin dashboard <ArrowRight size={16} /></>)}
+        </button>
+      </form>
+      <p className="auth2-alt">
+        <Link to="/login" className="auth2-mini-link"><ArrowLeft size={13} style={{ verticalAlign: -2 }} /> Back to user sign in</Link>
+      </p>
     </div>
   );
 }
@@ -310,6 +381,25 @@ function AuthSurface({ initial }) {
 
 export function LoginPage() { return <AuthSurface initial="login" />; }
 export function RegisterPage() { return <AuthSurface initial="register" />; }
+
+/**
+ * Dedicated admin login route (/admin-login). Uses the same visual shell as
+ * the regular auth screens but in static mode — no sign-up tab, no OAuth —
+ * and only ever proceeds to /admin, never /dashboard.
+ */
+export function AdminLoginPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (user?.role === 'admin' || user?.role === 'staff') navigate('/admin', { replace: true });
+  }, [user, navigate]);
+
+  return (
+    <AuthShell mode="login" staticMode>
+      <AdminSignInForm />
+    </AuthShell>
+  );
+}
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');

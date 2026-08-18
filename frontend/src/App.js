@@ -15,6 +15,7 @@ const Spinner = () => (
 
 //  Auth 
 const LoginPage          = lazyRetry(() => import('./pages/auth/LoginPage'));
+const AdminLoginPage     = lazyRetry(() => import('./pages/auth/LoginPage').then(m => ({ default: m.AdminLoginPage })));
 const RegisterPage       = lazyRetry(() => import('./pages/auth/RegisterPage'));
 const ForgotPasswordPage = lazyRetry(() => import('./pages/auth/ForgotPasswordPage'));
 const ResetPasswordPage  = lazyRetry(() => import('./pages/auth/ResetPasswordPage'));
@@ -141,6 +142,40 @@ const HistoryPage         = lazyRetry(() => import('./pages/aigen/HistoryPage'))
 const CreditsPage         = lazyRetry(() => import('./pages/aigen/CreditsPage'));
 const AIGenProfilePage    = lazyRetry(() => import('./pages/aigen/AIGenProfilePage'));
 const AIGenAdminPage      = lazyRetry(() => import('./pages/aigen/AIGenAdminPage'));
+const BioAdminDashboard   = lazyRetry(() => import('./pages/bio/BioAdminDashboard'));
+const BioAdminUsers       = lazyRetry(() => import('./pages/bio/BioAdminUsers'));
+const BioAdminPlans       = lazyRetry(() => import('./pages/bio/BioAdminPlans'));
+const BioAdminTemplates   = lazyRetry(() => import('./pages/bio/BioAdminTemplates'));
+const BioAdminCoupons     = lazyRetry(() => import('./pages/bio/BioAdminCoupons'));
+const BioAdminPayments2   = lazyRetry(() => import('./pages/bio/BioAdminPayments'));
+const BioAdminSettings    = lazyRetry(() => import('./pages/bio/BioAdminSettings'));
+const BLAdminDashboard    = lazyRetry(() => import('./pages/biolinks/BLAdminDashboard'));
+const BLAdminUsers        = lazyRetry(() => import('./pages/biolinks/BLAdminUsers'));
+const BLAdminPlans        = lazyRetry(() => import('./pages/biolinks/BLAdminPlans'));
+const BLAdminPages        = lazyRetry(() => import('./pages/biolinks/BLAdminPages'));
+const BLAdminSettings     = lazyRetry(() => import('./pages/biolinks/BLAdminSettings'));
+const PenAdminDashboard   = lazyRetry(() => import('./pages/pen/PenAdminDashboard'));
+const PenAdminUsers       = lazyRetry(() => import('./pages/pen/PenAdminUsers'));
+const PenAdminPackages    = lazyRetry(() => import('./pages/pen/PenAdminPackages'));
+const PenAdminTemplates   = lazyRetry(() => import('./pages/pen/PenAdminTemplates'));
+const PenAdminOrders      = lazyRetry(() => import('./pages/pen/PenAdminOrders'));
+const PenAdminSettings    = lazyRetry(() => import('./pages/pen/PenAdminSettings'));
+const ChatflowAdminDashboard   = lazyRetry(() => import('./pages/chatflow/adminIndex').then(m => ({ default: m.ChatflowAdminDashboard })));
+const ChatflowAdminTenants     = lazyRetry(() => import('./pages/chatflow/adminIndex').then(m => ({ default: m.ChatflowAdminTenants })));
+const DesignAdminDashboard     = lazyRetry(() => import('./pages/design/adminIndex').then(m => ({ default: m.DesignAdminDashboard })));
+const DesignAdminTemplates     = lazyRetry(() => import('./pages/design/adminIndex').then(m => ({ default: m.DesignAdminTemplates })));
+const SiteSpyAdminDashboard    = lazyRetry(() => import('./pages/sitespy/SiteSpyAdminDashboard'));
+const StackpostsAdminDashboard = lazyRetry(() => import('./pages/stackposts/adminIndex').then(m => ({ default: m.StackpostsAdminDashboard })));
+const StackpostsAdminTickets   = lazyRetry(() => import('./pages/stackposts/adminIndex').then(m => ({ default: m.StackpostsAdminTickets })));
+const StackpostsAdminWithdrawals = lazyRetry(() => import('./pages/stackposts/adminIndex').then(m => ({ default: m.StackpostsAdminWithdrawals })));
+const StackpostsAdminContent   = lazyRetry(() => import('./pages/stackposts/adminIndex').then(m => ({ default: m.StackpostsAdminContent })));
+const TelemanAdminDashboard    = lazyRetry(() => import('./pages/teleman/TelemanAdminDashboard'));
+const ToolsaiAdminDashboard    = lazyRetry(() => import('./pages/toolsai/adminIndex').then(m => ({ default: m.ToolsaiAdminDashboard })));
+const ToolsaiAdminContent      = lazyRetry(() => import('./pages/toolsai/adminIndex').then(m => ({ default: m.ToolsaiAdminContent })));
+const WhatsMLAdminDashboard    = lazyRetry(() => import('./pages/whatsml/WhatsMLAdminDashboard'));
+const ZamAdminDashboard        = lazyRetry(() => import('./pages/zamnexus/ZamAdminDashboard'));
+const SeoManagerAdminDashboard = lazyRetry(() => import('./pages/seomanager/SeoManagerAdminDashboard'));
+const WhatsappAdminSettings    = lazyRetry(() => import('./pages/whatsapp/WhatsappAdminSettings'));
 
 //  Publish (BeePost - compose, schedule, autopilot) 
 const PublishDashboard    = lazyRetry(() => import('./pages/publish/PublishDashboard'));
@@ -294,6 +329,7 @@ export default function App() {
 
             {/* Auth */}
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+            <Route path="/admin-login" element={<PublicRoute><AdminLoginPage /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
             <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
             <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
@@ -533,6 +569,40 @@ export default function App() {
             <Route path="/admin/docs" element={<Admin><DocAdminPage /></Admin>} />
             <Route path="/admin/publish" element={<Admin><PublishAdminPage /></Admin>} />
             <Route path="/admin/aigen" element={<Admin><AIGenAdminPage /></Admin>} />
+            <Route path="/admin/bio" element={<Admin><BioAdminDashboard /></Admin>} />
+            <Route path="/admin/bio/users" element={<Admin><BioAdminUsers /></Admin>} />
+            <Route path="/admin/bio/plans" element={<Admin><BioAdminPlans /></Admin>} />
+            <Route path="/admin/bio/templates" element={<Admin><BioAdminTemplates /></Admin>} />
+            <Route path="/admin/bio/coupons" element={<Admin><BioAdminCoupons /></Admin>} />
+            <Route path="/admin/bio/payments" element={<Admin><BioAdminPayments2 /></Admin>} />
+            <Route path="/admin/bio/settings" element={<Admin><BioAdminSettings /></Admin>} />
+            <Route path="/admin/biolinks" element={<Admin><BLAdminDashboard /></Admin>} />
+            <Route path="/admin/biolinks/users" element={<Admin><BLAdminUsers /></Admin>} />
+            <Route path="/admin/biolinks/plans" element={<Admin><BLAdminPlans /></Admin>} />
+            <Route path="/admin/biolinks/pages" element={<Admin><BLAdminPages /></Admin>} />
+            <Route path="/admin/biolinks/settings" element={<Admin><BLAdminSettings /></Admin>} />
+            <Route path="/admin/pen" element={<Admin><PenAdminDashboard /></Admin>} />
+            <Route path="/admin/pen/users" element={<Admin><PenAdminUsers /></Admin>} />
+            <Route path="/admin/pen/packages" element={<Admin><PenAdminPackages /></Admin>} />
+            <Route path="/admin/pen/templates" element={<Admin><PenAdminTemplates /></Admin>} />
+            <Route path="/admin/pen/orders" element={<Admin><PenAdminOrders /></Admin>} />
+            <Route path="/admin/pen/settings" element={<Admin><PenAdminSettings /></Admin>} />
+            <Route path="/admin/chatflow" element={<Admin><ChatflowAdminDashboard /></Admin>} />
+            <Route path="/admin/chatflow/tenants" element={<Admin><ChatflowAdminTenants /></Admin>} />
+            <Route path="/admin/design" element={<Admin><DesignAdminDashboard /></Admin>} />
+            <Route path="/admin/design/templates" element={<Admin><DesignAdminTemplates /></Admin>} />
+            <Route path="/admin/sitespy" element={<Admin><SiteSpyAdminDashboard /></Admin>} />
+            <Route path="/admin/stackposts" element={<Admin><StackpostsAdminDashboard /></Admin>} />
+            <Route path="/admin/stackposts/tickets" element={<Admin><StackpostsAdminTickets /></Admin>} />
+            <Route path="/admin/stackposts/withdrawals" element={<Admin><StackpostsAdminWithdrawals /></Admin>} />
+            <Route path="/admin/stackposts/content" element={<Admin><StackpostsAdminContent /></Admin>} />
+            <Route path="/admin/teleman" element={<Admin><TelemanAdminDashboard /></Admin>} />
+            <Route path="/admin/toolsai" element={<Admin><ToolsaiAdminDashboard /></Admin>} />
+            <Route path="/admin/toolsai/content" element={<Admin><ToolsaiAdminContent /></Admin>} />
+            <Route path="/admin/whatsml" element={<Admin><WhatsMLAdminDashboard /></Admin>} />
+            <Route path="/admin/zamnexus" element={<Admin><ZamAdminDashboard /></Admin>} />
+            <Route path="/admin/seomanager" element={<Admin><SeoManagerAdminDashboard /></Admin>} />
+            <Route path="/admin/whatsapp/settings" element={<Admin><WhatsappAdminSettings /></Admin>} />
 
             {/* 404 */}
             <Route path="*" element={<Navigate to="/"replace />} />
