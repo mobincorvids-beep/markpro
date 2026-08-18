@@ -28,7 +28,11 @@ async function runSeed(opts = {}) {
   if (!admin) {
     admin = await User.create({
       name: 'Admin', email: adminEmail,
-      password: await bcrypt.hash(adminPass, 12),
+      // Plaintext here — the User model's pre('save') hook hashes it once.
+      // Pre-hashing here too (as this used to) causes a double-hash, which
+      // silently breaks admin login since bcrypt.compare() then never
+      // matches the real plaintext password.
+      password: adminPass,
       role: 'admin', isVerified: true,
       affiliateCode: 'ADMIN001',
     });
@@ -36,8 +40,9 @@ async function runSeed(opts = {}) {
   } else {
     // Always resync the admin's password/role from .env so re-running
     // `npm run seed` reliably fixes admin login instead of silently no-op'ing
-    // on a stale password hash from an earlier seed/version.
-    admin.password = await bcrypt.hash(adminPass, 12);
+    // on a stale password hash from an earlier seed/version. Plaintext only
+    // — see note above about the pre-save hook already hashing this.
+    admin.password = adminPass;
     admin.role = 'admin';
     admin.isVerified = true;
     await admin.save();
@@ -50,7 +55,7 @@ async function runSeed(opts = {}) {
   if (!demo) {
     demo = await User.create({
       name: 'Demo User', email: demoEmail,
-      password: await bcrypt.hash('Demo@123456', 12),
+      password: 'Demo@123456',
       role: 'user', isVerified: true,
       affiliateCode: 'DEMO001',
       balance: 100,
