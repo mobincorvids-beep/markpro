@@ -35,7 +35,7 @@ export default function DashboardHome() {
             <h1 style={{ fontSize: 22, fontWeight: 700 }}>Welcome back, {user?.name?.split(' ')[0]}</h1>
             <p className="text-muted" style={{ fontSize: 13, marginTop: 3 }}>Here's an overview of your social proof activity.</p>
           </div>
-          <Link to="/dashboard/campaigns" className="btn btn-primary btn-sm"><Plus size={14} /> New Campaign</Link>
+          <Link to="/social/campaigns" className="btn btn-primary btn-sm"><Plus size={14} /> New Campaign</Link>
         </div>
 
         {/* Stat cards */}
@@ -58,12 +58,12 @@ export default function DashboardHome() {
           <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h3 style={{ fontWeight: 600, fontSize: 14 }}>Recent Campaigns</h3>
-              <Link to="/dashboard/campaigns" className="btn btn-ghost btn-sm" style={{ fontSize: 12 }}>All <ArrowRight size={12} /></Link>
+              <Link to="/social/campaigns" className="btn btn-ghost btn-sm" style={{ fontSize: 12 }}>All <ArrowRight size={12} /></Link>
             </div>
             {campaigns.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {campaigns.map(c => (
-                  <Link key={c._id} to={`/dashboard/campaigns/${c._id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg)', borderRadius: 8, textDecoration: 'none', border: '1px solid var(--border)' }}>
+                  <Link key={c._id} to={`/social/campaigns/${c._id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'var(--bg)', borderRadius: 8, textDecoration: 'none', border: '1px solid var(--border)' }}>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{c.name}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.domain}</div>
@@ -76,7 +76,7 @@ export default function DashboardHome() {
               <div style={{ textAlign: 'center', padding: '28px 0', color: 'var(--text-muted)' }}>
                 <Megaphone size={32} style={{ marginBottom: 10, opacity: .2, display: 'block', margin: '0 auto 10px' }} />
                 <p style={{ fontSize: 13 }}>No campaigns yet.</p>
-                <Link to="/dashboard/campaigns" className="btn btn-primary btn-sm" style={{ marginTop: 12 }}>Create your first</Link>
+                <Link to="/social/campaigns" className="btn btn-primary btn-sm" style={{ marginTop: 12 }}>Create your first</Link>
               </div>
             )}
           </div>

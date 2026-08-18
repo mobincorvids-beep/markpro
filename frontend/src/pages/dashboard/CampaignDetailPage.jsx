@@ -89,7 +89,7 @@ export default function CampaignDetailPage() {
         {/* Breadcrumb + actions */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button onClick={() => navigate('/dashboard/campaigns')} className="btn btn-ghost btn-sm btn-icon"><ChevronLeft size={16} /></button>
+            <button onClick={() => navigate('/social/campaigns')} className="btn btn-ghost btn-sm btn-icon"><ChevronLeft size={16} /></button>
             <div>
               <h1 style={{ fontSize: 19, fontWeight: 700 }}>{campaign.name}</h1>
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{campaign.domain}</p>
@@ -98,7 +98,7 @@ export default function CampaignDetailPage() {
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn btn-outline btn-sm" onClick={() => setShowPixel(true)}><Code2 size={13} /> Get Embed Code</button>
-            <Link to={`/dashboard/campaigns/${id}/notifications/new`} className="btn btn-primary btn-sm"><Plus size={13} /> Add Notification</Link>
+            <Link to={`/social/notifications/${id}/new`} className="btn btn-primary btn-sm"><Plus size={13} /> Add Notification</Link>
           </div>
         </div>
 
@@ -116,7 +116,7 @@ export default function CampaignDetailPage() {
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
             <h2 style={{ fontWeight: 600, fontSize: 15 }}>Notifications ({notifications.length})</h2>
-            <Link to={`/dashboard/campaigns/${id}/notifications/new`} className="btn btn-primary btn-sm"><Plus size={13} /> Add</Link>
+            <Link to={`/social/notifications/${id}/new`} className="btn btn-primary btn-sm"><Plus size={13} /> Add</Link>
           </div>
 
           {notifsLoading ? (
@@ -125,7 +125,7 @@ export default function CampaignDetailPage() {
             <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
               <Bell size={32} style={{ display: 'block', margin: '0 auto 12px', opacity: .2 }} />
               <p style={{ fontSize: 13, marginBottom: 14 }}>No notifications yet. Add your first widget.</p>
-              <Link to={`/dashboard/campaigns/${id}/notifications/new`} className="btn btn-primary btn-sm"><Plus size={13} /> Add Notification</Link>
+              <Link to={`/social/notifications/${id}/new`} className="btn btn-primary btn-sm"><Plus size={13} /> Add Notification</Link>
             </div>
           ) : (
             <table className="table">
@@ -146,7 +146,7 @@ export default function CampaignDetailPage() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <Link to={`/dashboard/campaigns/${id}/notifications/${n._id}/edit`} className="btn btn-ghost btn-sm btn-icon" title="Edit"><Edit3 size={13} /></Link>
+                        <Link to={`/social/notifications/${id}/${n._id}`} className="btn btn-ghost btn-sm btn-icon" title="Edit"><Edit3 size={13} /></Link>
                         <button className="btn btn-ghost btn-sm btn-icon" style={{ color: 'var(--error)' }} onClick={() => handleDeleteNotif(n._id)} title="Delete"><Trash2 size={13} /></button>
                       </div>
                     </td>

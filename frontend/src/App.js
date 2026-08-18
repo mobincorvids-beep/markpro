@@ -72,6 +72,7 @@ const SEOHub             = lazyRetry(() => import('./pages/seo/SEOHub'));
 const RankHub            = lazyRetry(() => import('./pages/rank/RankHub'));
 const ProjectsPage       = lazyRetry(() => import('./pages/rank/ProjectsPage'));
 const ProjectDetailPage  = lazyRetry(() => import('./pages/rank/ProjectDetailPage'));
+const ProjectDetailPage  = lazyRetry(() => import('./pages/rank/ProjectDetailPage'));
 const ReportsPage        = lazyRetry(() => import('./pages/rank/ReportsPage'));
 const ReportDetailPage   = lazyRetry(() => import('./pages/rank/ReportDetailPage'));
 const RankToolsPage      = lazyRetry(() => import('./pages/rank/ToolsPage'));
@@ -347,6 +348,7 @@ export default function App() {
             <Route path="/rank" element={<Private><RankHub /></Private>} />
             <Route path="/rank/projects" element={<Private><ProjectsPage /></Private>} />
             <Route path="/rank/projects/:id" element={<Private><ProjectDetailPage /></Private>} />
+            <Route path="/rank/projects/:id" element={<Private><ProjectDetailPage /></Private>} />
             <Route path="/rank/reports" element={<Private><ReportsPage /></Private>} />
             <Route path="/rank/reports/:id" element={<Private><ReportDetailPage /></Private>} />
             <Route path="/rank/tools" element={<Private><RankToolsPage /></Private>} />
@@ -395,7 +397,7 @@ export default function App() {
             <Route path="/social" element={<Private><DashboardHome /></Private>} />
             <Route path="/social/campaigns" element={<Private><CampaignsPage /></Private>} />
             <Route path="/social/campaigns/:id" element={<Private><CampaignDetailPage /></Private>} />
-            <Route path="/social/notifications/:cid/:nid" element={<Private><NotificationEditorPage /></Private>} />
+            <Route path="/social/notifications/:campaignId/:notifId" element={<Private><NotificationEditorPage /></Private>} />
             <Route path="/social/domains" element={<Private><DomainsPage /></Private>} />
             <Route path="/social/analytics" element={<Private><HandlersPage /></Private>} />
             <Route path="/social/leads" element={<Private><LeadsPage /></Private>} />

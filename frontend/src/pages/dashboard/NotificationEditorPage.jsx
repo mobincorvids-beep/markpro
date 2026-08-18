@@ -33,7 +33,11 @@ const defaultSettings = {
 export default function NotificationEditorPage() {
   const { campaignId, notifId } = useParams();
   const navigate = useNavigate();
-  const isEditing = !!notifId;
+  // notifId is always present in the URL (route requires it) — "new" is the
+  // literal placeholder for create mode, not a real notification id. Without
+  // this check, isEditing was true even when creating, so it tried to fetch
+  // and PUT-update a notification with id "new".
+  const isEditing = !!notifId && notifId !== 'new';
 
   const [form, setForm] = useState({ name: '', type: 'informational', settings: { ...defaultSettings } });
   const [activeTab, setActiveTab] = useState('general');
@@ -66,7 +70,7 @@ export default function NotificationEditorPage() {
         await notificationAPI.create(campaignId, form);
         toast.success('Notification created');
       }
-      navigate(`/dashboard/campaigns/${campaignId}`);
+      navigate(`/social/campaigns/${campaignId}`);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to save');
     } finally { setLoading(false); }
@@ -84,7 +88,7 @@ export default function NotificationEditorPage() {
       <div className="fade-in">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button onClick={() => navigate(`/dashboard/campaigns/${campaignId}`)} className="btn btn-ghost btn-sm btn-icon"><ChevronLeft size={16} /></button>
+            <button onClick={() => navigate(`/social/campaigns/${campaignId}`)} className="btn btn-ghost btn-sm btn-icon"><ChevronLeft size={16} /></button>
             <h1 style={{ fontSize: 19, fontWeight: 700 }}>{isEditing ? 'Edit Notification' : 'New Notification'}</h1>
           </div>
           <button className="btn btn-primary" onClick={handleSave} disabled={loading}>

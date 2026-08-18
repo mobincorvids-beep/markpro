@@ -131,10 +131,10 @@ export default function CampaignsPage() {
 
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <Link to={`/dashboard/campaigns/${c._id}`} className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>
+                  <Link to={`/social/campaigns/${c._id}`} className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>
                     Manage
                   </Link>
-                  <Link to={`/dashboard/campaigns/${c._id}`} className="btn btn-ghost btn-sm btn-icon" title="Analytics"><BarChart2 size={14} /></Link>
+                  <Link to={`/social/campaigns/${c._id}`} className="btn btn-ghost btn-sm btn-icon" title="Analytics"><BarChart2 size={14} /></Link>
                   <button className="btn btn-ghost btn-sm btn-icon" title="Delete" onClick={() => handleDelete(c._id)} style={{ color: 'var(--error)' }}><Trash2 size={14} /></button>
                 </div>
               </div>

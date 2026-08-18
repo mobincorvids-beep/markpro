@@ -124,7 +124,7 @@ export function ReportsPage() {
                 {reports.map(r => (
                   <tr key={r._id}>
                     <td style={{ maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      <Link to={`/dashboard/reports/${r._id}`} style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{r.url}</Link>
+                      <Link to={`/rank/reports/${r._id}`} style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{r.url}</Link>
                     </td>
                     <td><span className="badge badge-primary" style={{ fontSize: 10 }}>{r.type.replace(/_/g, ' ')}</span></td>
                     <td style={{ fontWeight: 700, color: r.score >= 80 ? 'var(--success)' : r.score >= 50 ? 'var(--warning)' : r.score ? 'var(--error)' : 'var(--text-muted)' }}>{r.score ?? '-'}</td>
@@ -202,7 +202,7 @@ export function ReportDetailPage() {
 
   const handleDelete = async () => {
     if (!window.confirm('Delete this report?')) return;
-    try { await reportsAPI.remove(id); navigate('/dashboard/reports'); toast.success('Report deleted'); }
+    try { await reportsAPI.remove(id); navigate('/rank/reports'); toast.success('Report deleted'); }
     catch { toast.error('Failed to delete'); }
   };
 

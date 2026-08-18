@@ -105,7 +105,7 @@ export function ProjectsPage() {
                   {p.latestAuditAt && <> · Last audit: {format(new Date(p.latestAuditAt), 'MMM d')}</>}
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <Link to={`/dashboard/projects/${p._id}`} className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>Open</Link>
+                  <Link to={`/rank/projects/${p._id}`} className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }}>Open</Link>
                   <button className="btn btn-ghost btn-sm btn-icon" style={{ color: 'var(--error)' }} onClick={() => handleDelete(p._id)} title="Delete"><Trash2 size={13} /></button>
                 </div>
               </div>
@@ -144,7 +144,7 @@ export function ProjectDetailPage() {
             clearInterval(poll);
             qc.invalidateQueries({ queryKey: ['reports', id] });
             qc.invalidateQueries({ queryKey: ['project', id] });
-            if (latest.status === 'completed') navigate(`/dashboard/reports/${latest._id}`);
+            if (latest.status === 'completed') navigate(`/rank/reports/${latest._id}`);
           }
         } catch { clearInterval(poll); }
       }, 2500);
@@ -162,7 +162,7 @@ export function ProjectDetailPage() {
       <div className="fade-in">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button onClick={() => navigate('/dashboard/projects')} className="btn btn-ghost btn-sm btn-icon"><ChevronLeft size={16} /></button>
+            <button onClick={() => navigate('/rank/projects')} className="btn btn-ghost btn-sm btn-icon"><ChevronLeft size={16} /></button>
             <div>
               <h1 style={{ fontSize: 19, fontWeight: 700 }}>{project.name}</h1>
               <a href={project.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -209,7 +209,7 @@ export function ProjectDetailPage() {
                     <td style={{ fontWeight: 700, color: r.score >= 80 ? 'var(--success)' : r.score >= 50 ? 'var(--warning)' : r.score ? 'var(--error)' : 'var(--text-muted)' }}>{r.score ?? '-'}</td>
                     <td><span className={`badge ${r.status === 'completed' ? 'badge-success' : r.status === 'failed' ? 'badge-error' : 'badge-warning'}`} style={{ fontSize: 10 }}>{r.status}</span></td>
                     <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.createdAt ? format(new Date(r.createdAt), 'MMM d, yyyy') : '-'}</td>
-                    <td><Link to={`/dashboard/reports/${r._id}`} className="btn btn-ghost btn-sm btn-icon" title="View"><Search size={13} /></Link></td>
+                    <td><Link to={`/rank/reports/${r._id}`} className="btn btn-ghost btn-sm btn-icon" title="View"><Search size={13} /></Link></td>
                   </tr>
                 ))}
               </tbody>
