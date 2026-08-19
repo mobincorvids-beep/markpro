@@ -21,6 +21,55 @@ const requireUrl = (input) => {
   return full;
 };
 
+/**
+ * Human-readable metadata for each seoAudit check, used to turn the raw
+ * checks{} object into the issues[]/summary{} shape the Reports UI (and the
+ * runReport controller, which already looks for results.issues/summary)
+ * expect. Without this, real computed check results never reached the
+ * screen — the report showed a score but an empty issue list and blank
+ * Passed/Warning/Critical counts, which read as "showing false data" even
+ * though every check itself was genuinely computed from the live page.
+ * `severity` here is what a FAILED check becomes; passed checks always
+ * render as 'passed' regardless of this map.
+ */
+const CHECK_META = {
+  httpsEnabled:    { title: 'HTTPS enabled',            category: 'Security',    severity: 'critical', recommendation: 'Serve the site over HTTPS with a valid SSL certificate.' },
+  titleTag:        { title: 'Title tag length',         category: 'On-page',     severity: 'critical', recommendation: 'Keep the title tag between 20 and 65 characters.' },
+  metaDescription: { title: 'Meta description length',  category: 'On-page',     severity: 'warning',  recommendation: 'Write a meta description between 70 and 165 characters.' },
+  singleH1:        { title: 'Single H1 tag',             category: 'On-page',     severity: 'warning',  recommendation: 'Use exactly one H1 tag per page.' },
+  headingStructure:{ title: 'Heading structure',          category: 'On-page',     severity: 'warning',  recommendation: 'Add H2 subheadings to structure the content.' },
+  imageAltText:    { title: 'Image alt text',             category: 'Accessibility', severity: 'warning', recommendation: 'Add descriptive alt text to every image.' },
+  canonicalTag:    { title: 'Canonical tag',              category: 'Technical',   severity: 'warning',  recommendation: 'Add a <link rel="canonical"> tag to avoid duplicate-content issues.' },
+  viewportMeta:    { title: 'Mobile viewport tag',        category: 'Mobile',      severity: 'critical', recommendation: 'Add <meta name="viewport" content="width=device-width, initial-scale=1">.' },
+  openGraph:       { title: 'Open Graph tags',            category: 'Social',      severity: 'info',     recommendation: 'Add og:title, og:description, and og:image tags for better social sharing.' },
+  structuredData:  { title: 'Structured data (JSON-LD)',  category: 'Technical',   severity: 'info',     recommendation: 'Add JSON-LD structured data to help search engines understand the page.' },
+  contentLength:   { title: 'Content length',             category: 'On-page',     severity: 'warning',  recommendation: 'Aim for at least 300 words of unique content.' },
+  compression:     { title: 'Compression enabled',        category: 'Performance', severity: 'warning',  recommendation: 'Enable gzip or brotli compression on the server.' },
+  statusOk:        { title: 'Page returns a 2xx status',  category: 'Technical',   severity: 'critical', recommendation: 'Fix the server so the page returns a successful HTTP status.' },
+};
+
+/** Turns a seoAudit() checks{} object into issues[] + summary{} for the UI. */
+function buildIssuesAndSummary(checks) {
+  const issues = Object.entries(checks).map(([key, check]) => {
+    const meta = CHECK_META[key] || { title: key, category: 'General', severity: 'warning', recommendation: '' };
+    return {
+      key,
+      severity: check.ok ? 'passed' : meta.severity,
+      title: meta.title,
+      description: String(check.value),
+      recommendation: check.ok ? '' : meta.recommendation,
+      category: meta.category,
+      value: check.value,
+    };
+  });
+  const summary = {
+    passed:   issues.filter((i) => i.severity === 'passed').length,
+    warnings: issues.filter((i) => i.severity === 'warning').length,
+    failed:   issues.filter((i) => i.severity === 'critical').length,
+  };
+  return { issues, summary };
+}
+
 /* ─────────────────────────── individual tools ─────────────────── */
 
 async function seoAudit(input) {
@@ -53,6 +102,7 @@ async function seoAudit(input) {
 
   const entries = Object.values(checks);
   const passed = entries.filter((c) => c.ok).length;
+  const { issues, summary } = buildIssuesAndSummary(checks);
 
   return {
     url,
@@ -60,6 +110,8 @@ async function seoAudit(input) {
     passed,
     totalChecks: entries.length,
     checks,
+    issues,
+    summary,
     title,
     description,
     h1: page.h1,
