@@ -31,13 +31,25 @@ function RunReportModal({ onClose, onStarted }) {
   const [form, setForm] = useState({ url: '', type: 'seo_audit' });
   const [loading, setLoading] = useState(false);
   const submit = async e => {
-    e.preventDefault(); setLoading(true);
+    e.preventDefault();
+    const url = form.url.trim();
+    if (!url) { toast.error('Please enter a URL'); return; }
+    setLoading(true);
+    const t = toast.loading('Running report… this can take up to a minute');
     try {
-      const { data } = await reportsAPI.run(form);
-      toast.success('Report started!');
-      onStarted(data.data.reportId);
+      const { data } = await reportsAPI.run({ ...form, url });
+      toast.dismiss(t);
+      if (data?.success === false) {
+        toast.error(data.message || 'Report failed');
+      } else {
+        toast.success('Report completed!');
+      }
+      onStarted(data?.data?.reportId);
       onClose();
-    } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
+    } catch (err) {
+      toast.dismiss(t);
+      toast.error(err.response?.data?.message || err.message || 'Failed to run report');
+    }
     finally { setLoading(false); }
   };
   return (
@@ -58,7 +70,7 @@ function RunReportModal({ onClose, onStarted }) {
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
             <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
-              {loading ? <><div className="spinner" /> Starting…</> : <><Play size={13} /> Run Report</>}
+              {loading ? <><div className="spinner" /> Running…</> : <><Play size={13} /> Run Report</>}
             </button>
           </div>
         </form>
@@ -70,6 +82,7 @@ function RunReportModal({ onClose, onStarted }) {
 /* ── REPORTS LIST ───────────────────────────────────────── */
 export function ReportsPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [showNew, setShowNew] = useState(false);
   const [typeFilter, setTypeFilter] = useState('');
   const [page, setPage] = useState(1);
@@ -78,6 +91,11 @@ export function ReportsPage() {
     queryKey: ['reports', typeFilter, page],
     queryFn: () => reportsAPI.list({ type: typeFilter || undefined, page, limit: 20 }),
     keepPreviousData: true,
+    // Keep polling while any report is still processing.
+    refetchInterval: q => {
+      const rows = q?.state?.data?.data?.data?.reports || [];
+      return rows.some(r => r.status === 'running' || r.status === 'pending') ? 4000 : false;
+    },
   });
 
   const reports = data?.data?.data?.reports || [];
@@ -91,7 +109,7 @@ export function ReportsPage() {
 
   return (
     <DashboardLayout title="Reports">
-      {showNew && <RunReportModal onClose={() => setShowNew(false)} onStarted={() => { qc.invalidateQueries({ queryKey: ['reports'] }); }} />}
+      {showNew && <RunReportModal onClose={() => setShowNew(false)} onStarted={id => { qc.invalidateQueries({ queryKey: ['reports'] }); if (id) navigate(`/rank/reports/${id}`); }} />}
       <div className="fade-in">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <div>

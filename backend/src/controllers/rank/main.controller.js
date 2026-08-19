@@ -131,30 +131,62 @@ exports.listReports = async (req, res) => {
 exports.runReport = async (req, res) => {
   try {
     const { url, type, projectId } = req.body;
+
+    if (!url || !String(url).trim())
+      return res.status(400).json({ success: false, message: 'A URL is required' });
+    const toolType = type || 'seo_audit';
+    if (!TOOLS[toolType])
+      return res.status(400).json({ success: false, message: `Unknown report type: ${toolType}` });
+
     const plan = req.user.plan;
     const monthLimit = plan?.limits?.reportsPerMonth ?? 10;
-    if (monthLimit !== -1 && req.user.usage.reports >= monthLimit)
+    const used = req.user.usage?.reports ?? 0;
+    if (monthLimit !== -1 && used >= monthLimit)
       return res.status(403).json({ success: false, message: `Monthly report limit (${monthLimit}) reached. Upgrade to continue.` });
 
-    const report = await Report.create({ user: req.user._id, project: projectId || null, type, url, status: 'running' });
+    const report = await Report.create({ user: req.user._id, project: projectId || null, type: toolType, url, status: 'running' });
     await User.findByIdAndUpdate(req.user._id, { $inc: { 'usage.reports': 1 } });
 
-    // Run async
-    runTool(type, { url }).then(async ({ results, duration }) => {
+    // IMPORTANT: run the tool inline and await it.
+    // Serverless platforms (Vercel/Lambda) freeze the function as soon as the
+    // response is sent, so a fire-and-forget promise never finishes and the
+    // report would stay stuck on "running" forever.
+    const TIMEOUT_MS = Number(process.env.REPORT_TIMEOUT_MS || 45000);
+    try {
+      const { results, duration } = await Promise.race([
+        runTool(toolType, { url, ...req.body }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Report timed out while fetching the URL')), TIMEOUT_MS)),
+      ]);
+
       const update = { status: 'completed', results, duration };
-      if (results.score !== undefined) update.score = results.score;
-      if (results.summary) update.summary = results.summary;
-      if (results.issues) update.issues = results.issues;
-      await Report.findByIdAndUpdate(report._id, update);
-      // Update project latest score
-      if (projectId && results.score !== undefined) {
+      if (results?.score !== undefined) update.score = results.score;
+      if (results?.summary) update.summary = results.summary;
+      if (results?.issues) update.issues = results.issues;
+      const saved = await Report.findByIdAndUpdate(report._id, update, { new: true });
+
+      if (projectId && results?.score !== undefined) {
         await Project.findByIdAndUpdate(projectId, { latestScore: results.score, latestAuditAt: new Date() });
       }
-    }).catch(async (err) => {
-      await Report.findByIdAndUpdate(report._id, { status: 'failed', errorMessage: err.message });
-    });
 
-    res.status(202).json({ success: true, message: 'Report started', data: { reportId: report._id } });
+      return res.status(201).json({
+        success: true,
+        message: 'Report completed',
+        data: { reportId: report._id, report: saved },
+      });
+    } catch (err) {
+      logger?.error?.(`runReport failed for ${url}: ${err.message}`);
+      const failed = await Report.findByIdAndUpdate(
+        report._id,
+        { status: 'failed', errorMessage: err.message },
+        { new: true },
+      );
+      return res.status(200).json({
+        success: false,
+        message: err.message || 'Report failed',
+        data: { reportId: report._id, report: failed },
+      });
+    }
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

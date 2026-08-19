@@ -1,0 +1,177 @@
+diff --git a/backend/src/controllers/rank/main.controller.js b/backend/src/controllers/rank/main.controller.js
+index 7f71bfa..375eb83 100644
+--- a/backend/src/controllers/rank/main.controller.js
++++ b/backend/src/controllers/rank/main.controller.js
+@@ -131,30 +131,62 @@ exports.listReports = async (req, res) => {
+ exports.runReport = async (req, res) => {
+   try {
+     const { url, type, projectId } = req.body;
++
++    if (!url || !String(url).trim())
++      return res.status(400).json({ success: false, message: 'A URL is required' });
++    const toolType = type || 'seo_audit';
++    if (!TOOLS[toolType])
++      return res.status(400).json({ success: false, message: `Unknown report type: ${toolType}` });
++
+     const plan = req.user.plan;
+     const monthLimit = plan?.limits?.reportsPerMonth ?? 10;
+-    if (monthLimit !== -1 && req.user.usage.reports >= monthLimit)
++    const used = req.user.usage?.reports ?? 0;
++    if (monthLimit !== -1 && used >= monthLimit)
+       return res.status(403).json({ success: false, message: `Monthly report limit (${monthLimit}) reached. Upgrade to continue.` });
+ 
+-    const report = await Report.create({ user: req.user._id, project: projectId || null, type, url, status: 'running' });
++    const report = await Report.create({ user: req.user._id, project: projectId || null, type: toolType, url, status: 'running' });
+     await User.findByIdAndUpdate(req.user._id, { $inc: { 'usage.reports': 1 } });
+ 
+-    // Run async
+-    runTool(type, { url }).then(async ({ results, duration }) => {
++    // IMPORTANT: run the tool inline and await it.
++    // Serverless platforms (Vercel/Lambda) freeze the function as soon as the
++    // response is sent, so a fire-and-forget promise never finishes and the
++    // report would stay stuck on "running" forever.
++    const TIMEOUT_MS = Number(process.env.REPORT_TIMEOUT_MS || 45000);
++    try {
++      const { results, duration } = await Promise.race([
++        runTool(toolType, { url, ...req.body }),
++        new Promise((_, reject) =>
++          setTimeout(() => reject(new Error('Report timed out while fetching the URL')), TIMEOUT_MS)),
++      ]);
++
+       const update = { status: 'completed', results, duration };
+-      if (results.score !== undefined) update.score = results.score;
+-      if (results.summary) update.summary = results.summary;
+-      if (results.issues) update.issues = results.issues;
+-      await Report.findByIdAndUpdate(report._id, update);
+-      // Update project latest score
+-      if (projectId && results.score !== undefined) {
++      if (results?.score !== undefined) update.score = results.score;
++      if (results?.summary) update.summary = results.summary;
++      if (results?.issues) update.issues = results.issues;
++      const saved = await Report.findByIdAndUpdate(report._id, update, { new: true });
++
++      if (projectId && results?.score !== undefined) {
+         await Project.findByIdAndUpdate(projectId, { latestScore: results.score, latestAuditAt: new Date() });
+       }
+-    }).catch(async (err) => {
+-      await Report.findByIdAndUpdate(report._id, { status: 'failed', errorMessage: err.message });
+-    });
+ 
+-    res.status(202).json({ success: true, message: 'Report started', data: { reportId: report._id } });
++      return res.status(201).json({
++        success: true,
++        message: 'Report completed',
++        data: { reportId: report._id, report: saved },
++      });
++    } catch (err) {
++      logger?.error?.(`runReport failed for ${url}: ${err.message}`);
++      const failed = await Report.findByIdAndUpdate(
++        report._id,
++        { status: 'failed', errorMessage: err.message },
++        { new: true },
++      );
++      return res.status(200).json({
++        success: false,
++        message: err.message || 'Report failed',
++        data: { reportId: report._id, report: failed },
++      });
++    }
+   } catch (err) {
+     res.status(500).json({ success: false, message: err.message });
+   }
+diff --git a/backend/vercel.json b/backend/vercel.json
+index d4b0f38..ffd348b 100644
+--- a/backend/vercel.json
++++ b/backend/vercel.json
+@@ -1,9 +1,11 @@
+ {
+   "version": 2,
+-  "builds": [
+-    { "src": "api/index.js", "use": "@vercel/node" }
+-  ],
+-  "routes": [
+-    { "src": "/(.*)", "dest": "api/index.js" }
++  "functions": {
++    "api/index.js": {
++      "maxDuration": 60
++    }
++  },
++  "rewrites": [
++    { "source": "/(.*)", "destination": "/api/index.js" }
+   ]
+-}
+\ No newline at end of file
++}
+diff --git a/frontend/src/pages/rank/ReportsPage.jsx b/frontend/src/pages/rank/ReportsPage.jsx
+index ce820af..1a25bc2 100644
+--- a/frontend/src/pages/rank/ReportsPage.jsx
++++ b/frontend/src/pages/rank/ReportsPage.jsx
+@@ -31,13 +31,25 @@ function RunReportModal({ onClose, onStarted }) {
+   const [form, setForm] = useState({ url: '', type: 'seo_audit' });
+   const [loading, setLoading] = useState(false);
+   const submit = async e => {
+-    e.preventDefault(); setLoading(true);
++    e.preventDefault();
++    const url = form.url.trim();
++    if (!url) { toast.error('Please enter a URL'); return; }
++    setLoading(true);
++    const t = toast.loading('Running report… this can take up to a minute');
+     try {
+-      const { data } = await reportsAPI.run(form);
+-      toast.success('Report started!');
+-      onStarted(data.data.reportId);
++      const { data } = await reportsAPI.run({ ...form, url });
++      toast.dismiss(t);
++      if (data?.success === false) {
++        toast.error(data.message || 'Report failed');
++      } else {
++        toast.success('Report completed!');
++      }
++      onStarted(data?.data?.reportId);
+       onClose();
+-    } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
++    } catch (err) {
++      toast.dismiss(t);
++      toast.error(err.response?.data?.message || err.message || 'Failed to run report');
++    }
+     finally { setLoading(false); }
+   };
+   return (
+@@ -58,7 +70,7 @@ function RunReportModal({ onClose, onStarted }) {
+           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+             <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>Cancel</button>
+             <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
+-              {loading ? <><div className="spinner" /> Starting…</> : <><Play size={13} /> Run Report</>}
++              {loading ? <><div className="spinner" /> Running…</> : <><Play size={13} /> Run Report</>}
+             </button>
+           </div>
+         </form>
+@@ -70,6 +82,7 @@ function RunReportModal({ onClose, onStarted }) {
+ /* ── REPORTS LIST ───────────────────────────────────────── */
+ export function ReportsPage() {
+   const qc = useQueryClient();
++  const navigate = useNavigate();
+   const [showNew, setShowNew] = useState(false);
+   const [typeFilter, setTypeFilter] = useState('');
+   const [page, setPage] = useState(1);
+@@ -78,6 +91,11 @@ export function ReportsPage() {
+     queryKey: ['reports', typeFilter, page],
+     queryFn: () => reportsAPI.list({ type: typeFilter || undefined, page, limit: 20 }),
+     keepPreviousData: true,
++    // Keep polling while any report is still processing.
++    refetchInterval: q => {
++      const rows = q?.state?.data?.data?.data?.reports || [];
++      return rows.some(r => r.status === 'running' || r.status === 'pending') ? 4000 : false;
++    },
+   });
+ 
+   const reports = data?.data?.data?.reports || [];
+@@ -91,7 +109,7 @@ export function ReportsPage() {
+ 
+   return (
+     <DashboardLayout title="Reports">
+-      {showNew && <RunReportModal onClose={() => setShowNew(false)} onStarted={() => { qc.invalidateQueries({ queryKey: ['reports'] }); }} />}
++      {showNew && <RunReportModal onClose={() => setShowNew(false)} onStarted={id => { qc.invalidateQueries({ queryKey: ['reports'] }); if (id) navigate(`/rank/reports/${id}`); }} />}
+       <div className="fade-in">
+         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+           <div>
