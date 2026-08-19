@@ -17,7 +17,7 @@ export function AddFundsPage() {
   const [checking, setChecking] = useState(false);
 
   useEffect(() => {
-    fundsApi.methods().then(r => { setMethods(r.data); if (r.data[0]) setMethod(r.data[0].gateway); });
+    fundsApi.methods().then(r => { setMethods(r.data.data); if (r.data.data[0]) setMethod(r.data.data[0].gateway); });
   }, []);
 
   const checkCoupon = async () => {
@@ -207,7 +207,7 @@ export function SubscriptionsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    subscriptionsApi.list().then(r => setSubs(r.data)).finally(() => setLoading(false));
+    subscriptionsApi.list().then(r => setSubs(r.data.data)).finally(() => setLoading(false));
   }, []);
 
   const toggle = async (id, current) => {
@@ -346,9 +346,9 @@ export function ServicesPage() {
 
   useEffect(() => {
     servicesApi.grouped().then(r => {
-      setCategories(r.data);
+      setCategories(r.data.data);
       const exp = {};
-      r.data.forEach(c => { exp[c._id] = true; });
+      r.data.data.forEach(c => { exp[c._id] = true; });
       setExpanded(exp);
     }).finally(() => setLoading(false));
   }, []);

@@ -8,14 +8,36 @@ async function callGemini(prompt, model = 'gemini-flash-latest') {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error('GEMINI_API_KEY not configured');
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-  const t0   = Date.now();
-  const { data } = await axios.post(url, {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
-  }, { timeout: 30000 });
-  const text   = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  const tokens = data.usageMetadata?.totalTokenCount || 0;
-  return { text, tokens, duration: Date.now() - t0 };
+  const t0 = Date.now();
+
+  // Gemini returns 503 ("model overloaded") or 429 (rate limited) fairly
+  // often under load, and this call previously had zero retry — any
+  // transient overload became a hard failure straight to the user. Retry
+  // a few times with backoff before giving up, which is what actually
+  // fixes most of these without needing any account/key change.
+  const MAX_ATTEMPTS = 3;
+  let lastErr;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const { data } = await axios.post(url, {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
+      }, { timeout: 30000 });
+      const text   = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const tokens = data.usageMetadata?.totalTokenCount || 0;
+      return { text, tokens, duration: Date.now() - t0 };
+    } catch (err) {
+      lastErr = err;
+      const status = err.response?.status;
+      const retryable = status === 503 || status === 429;
+      if (!retryable || attempt === MAX_ATTEMPTS) break;
+      await new Promise(r => setTimeout(r, 800 * attempt)); // 800ms, 1600ms
+    }
+  }
+  const status = lastErr.response?.status;
+  if (status === 503) throw new Error('The AI service is temporarily overloaded — please try again in a moment.');
+  if (status === 429) throw new Error('The AI service rate limit was hit — please wait a moment and try again.');
+  throw lastErr;
 }
 
 // Parse JSON from Gemini response safely
