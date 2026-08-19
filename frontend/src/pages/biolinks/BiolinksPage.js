@@ -94,15 +94,17 @@ export default function BiolinksPage() {
               <div className="card-body">
                 <div style={{ fontWeight: 700, marginBottom: 4 }}>{p.settings?.name || p.url}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-3)', fontFamily: 'monospace', marginBottom: 10 }}>/{p.url}</div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
                   <span className={`badge ${p.is_enabled === false ? 'badge-default' : 'badge-success'}`}>
                     {p.is_enabled === false ? 'Unpublished' : 'Live'}
                   </span>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <Link to={`/biolinks/pages/${p._id}/edit`} className="btn btn-secondary btn-xs"><Edit3 size={13} /></Link>
-                    <a className="btn btn-secondary btn-xs" href={`/r/${p.url}`} target="_blank" rel="noreferrer"><ExternalLink size={13} /></a>
-                    <button className="btn btn-secondary btn-xs" onClick={() => toggle(p)}>{p.is_enabled === false ? 'Publish' : 'Unpublish'}</button>
-                    <button className="btn btn-secondary btn-xs" onClick={() => remove(p)}><Trash2 size={13} /></button>
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button className="btn btn-secondary btn-xs" onClick={() => toggle(p)}>
+                      {p.is_enabled === false ? 'Publish' : 'Unpublish'}
+                    </button>
+                    <Link to={`/biolinks/pages/${p._id}/edit`} className="btn btn-secondary btn-xs btn-icon" title="Edit page" aria-label="Edit page"><Edit3 size={13} /></Link>
+                    <a className="btn btn-secondary btn-xs btn-icon" href={`/r/${p.url}`} target="_blank" rel="noreferrer" title="Open live page" aria-label="Open live page"><ExternalLink size={13} /></a>
+                    <button className="btn btn-danger btn-xs btn-icon" onClick={() => remove(p)} title="Delete page" aria-label="Delete page"><Trash2 size={13} /></button>
                   </div>
                 </div>
               </div>

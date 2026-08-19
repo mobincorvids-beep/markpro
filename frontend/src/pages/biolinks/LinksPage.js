@@ -110,11 +110,13 @@ export default function LinksPage() {
                       {l.is_enabled === false ? 'Paused' : 'Active'}
                     </span>
                   </td>
-                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                    <button className="btn btn-secondary btn-xs" onClick={() => copy(l)} title="Copy link"><Copy size={13} /></button>{' '}
-                    <a className="btn btn-secondary btn-xs" href={l.location_url} target="_blank" rel="noreferrer" title="Open destination"><ExternalLink size={13} /></a>{' '}
-                    <button className="btn btn-secondary btn-xs" onClick={() => toggle(l)}>{l.is_enabled === false ? 'Resume' : 'Pause'}</button>{' '}
-                    <button className="btn btn-secondary btn-xs" onClick={() => remove(l)}><Trash2 size={13} /></button>
+                  <td>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'flex-end' }}>
+                      <button className="btn btn-secondary btn-xs" onClick={() => toggle(l)}>{l.is_enabled === false ? 'Resume' : 'Pause'}</button>
+                      <button className="btn btn-secondary btn-xs btn-icon" onClick={() => copy(l)} title="Copy link" aria-label="Copy link"><Copy size={13} /></button>
+                      <a className="btn btn-secondary btn-xs btn-icon" href={l.location_url} target="_blank" rel="noreferrer" title="Open destination" aria-label="Open destination"><ExternalLink size={13} /></a>
+                      <button className="btn btn-danger btn-xs btn-icon" onClick={() => remove(l)} title="Delete link" aria-label="Delete link"><Trash2 size={13} /></button>
+                    </div>
                   </td>
                 </tr>
               ))}

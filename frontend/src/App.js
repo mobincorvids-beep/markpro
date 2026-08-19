@@ -350,6 +350,8 @@ export default function App() {
             <Route path="/rank" element={<Private><RankHub /></Private>} />
             <Route path="/rank/projects" element={<Private><ProjectsPage /></Private>} />
             <Route path="/rank/projects/:id" element={<Private><ProjectDetailPage /></Private>} />
+            <Route path="/reports" element={<Private><ReportsPage /></Private>} />
+            <Route path="/reports/:id" element={<Private><ReportDetailPage /></Private>} />
             <Route path="/rank/reports" element={<Private><ReportsPage /></Private>} />
             <Route path="/rank/reports/:id" element={<Private><ReportDetailPage /></Private>} />
             <Route path="/rank/tools" element={<Private><RankToolsPage /></Private>} />

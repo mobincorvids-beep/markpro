@@ -507,7 +507,7 @@ export default function AppLayout({ children }) {
           {/* Topbar Center Tabs */}
           <div className="topbar-tabs">
             <NavLink to="/dashboard" className={({ isActive }) => `topbar-tab ${isActive ? 'active' : ''}`}>Workspace</NavLink>
-            <NavLink to="/seo" className="topbar-tab">Reports</NavLink>
+            <NavLink to="/reports" className={({ isActive }) => `topbar-tab ${isActive ? 'active' : ''}`}>Reports</NavLink>
             <NavLink to="/whatsapp" className="topbar-tab">Automation</NavLink>
           </div>
 

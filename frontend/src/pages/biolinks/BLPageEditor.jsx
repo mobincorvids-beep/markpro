@@ -153,8 +153,8 @@ export default function BLPageEditor() {
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
         {BLOCK_TYPES.map(bt => (
-          <button key={bt.type} className="btn btn-secondary btn-xs" onClick={() => addBlock(bt.type)}>
-            <Plus size={12} /> {bt.label}
+          <button key={bt.type} className="btn btn-secondary btn-sm" onClick={() => addBlock(bt.type)}>
+            <Plus size={13} /> {bt.label}
           </button>
         ))}
       </div>
@@ -174,9 +174,9 @@ export default function BLPageEditor() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <span className="badge badge-default" style={{ textTransform: 'capitalize' }}>{b.type.replace('_', ' ')}</span>
                   <div style={{ display: 'flex', gap: 4 }}>
-                    <button className="btn btn-secondary btn-xs" onClick={() => move(i, -1)} disabled={i === 0}><ChevronUp size={12} /></button>
-                    <button className="btn btn-secondary btn-xs" onClick={() => move(i, 1)} disabled={i === blocks.length - 1}><ChevronDown size={12} /></button>
-                    <button className="btn btn-secondary btn-xs" onClick={() => removeBlock(b)}><Trash2 size={12} /></button>
+                    <button className="btn btn-secondary btn-xs btn-icon" onClick={() => move(i, -1)} disabled={i === 0} title="Move up" aria-label="Move up"><ChevronUp size={12} /></button>
+                    <button className="btn btn-secondary btn-xs btn-icon" onClick={() => move(i, 1)} disabled={i === blocks.length - 1} title="Move down" aria-label="Move down"><ChevronDown size={12} /></button>
+                    <button className="btn btn-danger btn-xs btn-icon" onClick={() => removeBlock(b)} title="Remove block" aria-label="Remove block"><Trash2 size={12} /></button>
                   </div>
                 </div>
                 <BlockFields block={b} onChange={(next) => updateLocal(b._id, next)} />

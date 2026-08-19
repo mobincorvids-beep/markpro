@@ -1546,7 +1546,9 @@ svg.lucide { color: inherit; }
 }
 .protip-box-txt{ font-size:12px; color:var(--text-2); line-height:1.5; }
 
-.btn-xs{ padding:5px!important; height:28px; width:28px; }
+.btn-xs.btn-icon{ padding:5px!important; height:28px; width:28px; min-width:28px; }
+.btn-xs{ padding:5px 10px; min-height:28px; }
+.btn-xs > svg{ flex:0 0 auto; }
 
 /* dark mode: keep module/stat icon tiles readable on true black */
 .dark .stitch-mod-icon,

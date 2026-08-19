@@ -1,0 +1,152 @@
+diff --git a/frontend/src/App.js b/frontend/src/App.js
+index 4530bd5..1cb4314 100644
+--- a/frontend/src/App.js
++++ b/frontend/src/App.js
+@@ -350,6 +350,8 @@ export default function App() {
+             <Route path="/rank" element={<Private><RankHub /></Private>} />
+             <Route path="/rank/projects" element={<Private><ProjectsPage /></Private>} />
+             <Route path="/rank/projects/:id" element={<Private><ProjectDetailPage /></Private>} />
++            <Route path="/reports" element={<Private><ReportsPage /></Private>} />
++            <Route path="/reports/:id" element={<Private><ReportDetailPage /></Private>} />
+             <Route path="/rank/reports" element={<Private><ReportsPage /></Private>} />
+             <Route path="/rank/reports/:id" element={<Private><ReportDetailPage /></Private>} />
+             <Route path="/rank/tools" element={<Private><RankToolsPage /></Private>} />
+diff --git a/frontend/src/components/layout/AppLayout.jsx b/frontend/src/components/layout/AppLayout.jsx
+index b50ecca..019f50e 100644
+--- a/frontend/src/components/layout/AppLayout.jsx
++++ b/frontend/src/components/layout/AppLayout.jsx
+@@ -507,7 +507,7 @@ export default function AppLayout({ children }) {
+           {/* Topbar Center Tabs */}
+           <div className="topbar-tabs">
+             <NavLink to="/dashboard" className={({ isActive }) => `topbar-tab ${isActive ? 'active' : ''}`}>Workspace</NavLink>
+-            <NavLink to="/seo" className="topbar-tab">Reports</NavLink>
++            <NavLink to="/reports" className={({ isActive }) => `topbar-tab ${isActive ? 'active' : ''}`}>Reports</NavLink>
+             <NavLink to="/whatsapp" className="topbar-tab">Automation</NavLink>
+           </div>
+ 
+diff --git a/frontend/src/index.css b/frontend/src/index.css
+index a1bb50f..d416820 100644
+--- a/frontend/src/index.css
++++ b/frontend/src/index.css
+@@ -1546,7 +1546,9 @@ svg.lucide { color: inherit; }
+ }
+ .protip-box-txt{ font-size:12px; color:var(--text-2); line-height:1.5; }
+ 
+-.btn-xs{ padding:5px!important; height:28px; width:28px; }
++.btn-xs.btn-icon{ padding:5px!important; height:28px; width:28px; min-width:28px; }
++.btn-xs{ padding:5px 10px; min-height:28px; }
++.btn-xs > svg{ flex:0 0 auto; }
+ 
+ /* dark mode: keep module/stat icon tiles readable on true black */
+ .dark .stitch-mod-icon,
+diff --git a/frontend/src/pages/biolinks/BLPageEditor.jsx b/frontend/src/pages/biolinks/BLPageEditor.jsx
+index b654651..1dc2883 100644
+--- a/frontend/src/pages/biolinks/BLPageEditor.jsx
++++ b/frontend/src/pages/biolinks/BLPageEditor.jsx
+@@ -153,8 +153,8 @@ export default function BLPageEditor() {
+ 
+       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+         {BLOCK_TYPES.map(bt => (
+-          <button key={bt.type} className="btn btn-secondary btn-xs" onClick={() => addBlock(bt.type)}>
+-            <Plus size={12} /> {bt.label}
++          <button key={bt.type} className="btn btn-secondary btn-sm" onClick={() => addBlock(bt.type)}>
++            <Plus size={13} /> {bt.label}
+           </button>
+         ))}
+       </div>
+@@ -174,9 +174,9 @@ export default function BLPageEditor() {
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                   <span className="badge badge-default" style={{ textTransform: 'capitalize' }}>{b.type.replace('_', ' ')}</span>
+                   <div style={{ display: 'flex', gap: 4 }}>
+-                    <button className="btn btn-secondary btn-xs" onClick={() => move(i, -1)} disabled={i === 0}><ChevronUp size={12} /></button>
+-                    <button className="btn btn-secondary btn-xs" onClick={() => move(i, 1)} disabled={i === blocks.length - 1}><ChevronDown size={12} /></button>
+-                    <button className="btn btn-secondary btn-xs" onClick={() => removeBlock(b)}><Trash2 size={12} /></button>
++                    <button className="btn btn-secondary btn-xs btn-icon" onClick={() => move(i, -1)} disabled={i === 0} title="Move up" aria-label="Move up"><ChevronUp size={12} /></button>
++                    <button className="btn btn-secondary btn-xs btn-icon" onClick={() => move(i, 1)} disabled={i === blocks.length - 1} title="Move down" aria-label="Move down"><ChevronDown size={12} /></button>
++                    <button className="btn btn-danger btn-xs btn-icon" onClick={() => removeBlock(b)} title="Remove block" aria-label="Remove block"><Trash2 size={12} /></button>
+                   </div>
+                 </div>
+                 <BlockFields block={b} onChange={(next) => updateLocal(b._id, next)} />
+diff --git a/frontend/src/pages/biolinks/BiolinksPage.js b/frontend/src/pages/biolinks/BiolinksPage.js
+index 1dc8649..1c8f1c5 100644
+--- a/frontend/src/pages/biolinks/BiolinksPage.js
++++ b/frontend/src/pages/biolinks/BiolinksPage.js
+@@ -94,15 +94,17 @@ export default function BiolinksPage() {
+               <div className="card-body">
+                 <div style={{ fontWeight: 700, marginBottom: 4 }}>{p.settings?.name || p.url}</div>
+                 <div style={{ fontSize: 12, color: 'var(--text-3)', fontFamily: 'monospace', marginBottom: 10 }}>/{p.url}</div>
+-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
++                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                   <span className={`badge ${p.is_enabled === false ? 'badge-default' : 'badge-success'}`}>
+                     {p.is_enabled === false ? 'Unpublished' : 'Live'}
+                   </span>
+-                  <div style={{ display: 'flex', gap: 6 }}>
+-                    <Link to={`/biolinks/pages/${p._id}/edit`} className="btn btn-secondary btn-xs"><Edit3 size={13} /></Link>
+-                    <a className="btn btn-secondary btn-xs" href={`/r/${p.url}`} target="_blank" rel="noreferrer"><ExternalLink size={13} /></a>
+-                    <button className="btn btn-secondary btn-xs" onClick={() => toggle(p)}>{p.is_enabled === false ? 'Publish' : 'Unpublish'}</button>
+-                    <button className="btn btn-secondary btn-xs" onClick={() => remove(p)}><Trash2 size={13} /></button>
++                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
++                    <button className="btn btn-secondary btn-xs" onClick={() => toggle(p)}>
++                      {p.is_enabled === false ? 'Publish' : 'Unpublish'}
++                    </button>
++                    <Link to={`/biolinks/pages/${p._id}/edit`} className="btn btn-secondary btn-xs btn-icon" title="Edit page" aria-label="Edit page"><Edit3 size={13} /></Link>
++                    <a className="btn btn-secondary btn-xs btn-icon" href={`/r/${p.url}`} target="_blank" rel="noreferrer" title="Open live page" aria-label="Open live page"><ExternalLink size={13} /></a>
++                    <button className="btn btn-danger btn-xs btn-icon" onClick={() => remove(p)} title="Delete page" aria-label="Delete page"><Trash2 size={13} /></button>
+                   </div>
+                 </div>
+               </div>
+diff --git a/frontend/src/pages/biolinks/LinksPage.js b/frontend/src/pages/biolinks/LinksPage.js
+index d745d62..42e0277 100644
+--- a/frontend/src/pages/biolinks/LinksPage.js
++++ b/frontend/src/pages/biolinks/LinksPage.js
+@@ -110,11 +110,13 @@ export default function LinksPage() {
+                       {l.is_enabled === false ? 'Paused' : 'Active'}
+                     </span>
+                   </td>
+-                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+-                    <button className="btn btn-secondary btn-xs" onClick={() => copy(l)} title="Copy link"><Copy size={13} /></button>{' '}
+-                    <a className="btn btn-secondary btn-xs" href={l.location_url} target="_blank" rel="noreferrer" title="Open destination"><ExternalLink size={13} /></a>{' '}
+-                    <button className="btn btn-secondary btn-xs" onClick={() => toggle(l)}>{l.is_enabled === false ? 'Resume' : 'Pause'}</button>{' '}
+-                    <button className="btn btn-secondary btn-xs" onClick={() => remove(l)}><Trash2 size={13} /></button>
++                  <td>
++                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'flex-end' }}>
++                      <button className="btn btn-secondary btn-xs" onClick={() => toggle(l)}>{l.is_enabled === false ? 'Resume' : 'Pause'}</button>
++                      <button className="btn btn-secondary btn-xs btn-icon" onClick={() => copy(l)} title="Copy link" aria-label="Copy link"><Copy size={13} /></button>
++                      <a className="btn btn-secondary btn-xs btn-icon" href={l.location_url} target="_blank" rel="noreferrer" title="Open destination" aria-label="Open destination"><ExternalLink size={13} /></a>
++                      <button className="btn btn-danger btn-xs btn-icon" onClick={() => remove(l)} title="Delete link" aria-label="Delete link"><Trash2 size={13} /></button>
++                    </div>
+                   </td>
+                 </tr>
+               ))}
+diff --git a/frontend/src/services/api.js b/frontend/src/services/api.js
+index 4bbbdd4..943b2e7 100644
+--- a/frontend/src/services/api.js
++++ b/frontend/src/services/api.js
+@@ -1,7 +1,17 @@
+ import axios from 'axios';
+ 
++// Resolve the API base once. In production a missing REACT_APP_API_URL used to
++// fall through to http://localhost:5000/api, which made every deployed request
++// fail with "Network Error" from the visitor's own machine. Fall back to a
++// same-origin /api path instead so a proxy/rewrite can still serve the app.
++export const API_BASE_URL =
++  process.env.REACT_APP_API_URL ||
++  (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
++    ? `${window.location.origin}/api`
++    : 'http://localhost:5000/api');
++
+ const api = axios.create({
+-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
++  baseURL: API_BASE_URL,
+   headers: { 'Content-Type': 'application/json' },
+ });
+ 
+@@ -20,7 +30,7 @@ api.interceptors.response.use(
+       const rt = localStorage.getItem('refreshToken');
+       if (rt) {
+         try {
+-          const base = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
++          const base = API_BASE_URL;
+           const { data } = await axios.post(`${base}/auth/refresh`, { refreshToken: rt });
+           const at = data.data?.accessToken || data.accessToken;
+           localStorage.setItem('accessToken', at);

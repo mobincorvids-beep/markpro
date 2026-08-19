@@ -1,7 +1,17 @@
 import axios from 'axios';
 
+// Resolve the API base once. In production a missing REACT_APP_API_URL used to
+// fall through to http://localhost:5000/api, which made every deployed request
+// fail with "Network Error" from the visitor's own machine. Fall back to a
+// same-origin /api path instead so a proxy/rewrite can still serve the app.
+export const API_BASE_URL =
+  process.env.REACT_APP_API_URL ||
+  (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+    ? `${window.location.origin}/api`
+    : 'http://localhost:5000/api');
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -20,7 +30,7 @@ api.interceptors.response.use(
       const rt = localStorage.getItem('refreshToken');
       if (rt) {
         try {
-          const base = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+          const base = API_BASE_URL;
           const { data } = await axios.post(`${base}/auth/refresh`, { refreshToken: rt });
           const at = data.data?.accessToken || data.accessToken;
           localStorage.setItem('accessToken', at);
