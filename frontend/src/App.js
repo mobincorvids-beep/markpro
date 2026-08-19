@@ -100,6 +100,8 @@ const DrivePage          = lazyRetry(() => import('./pages/docs/DrivePage'));
 const RequestsPage       = lazyRetry(() => import('./pages/docs/RequestsPage'));
 const RequestFulfilPage  = lazyRetry(() => import('./pages/docs/RequestFulfilPage'));
 const PublicSharePage    = lazyRetry(() => import('./pages/docs/PublicSharePage'));
+const PublicBiolinkPage  = lazyRetry(() => import('./pages/biolinks/public/PublicBiolinkPage'));
+const BLPageEditor       = lazyRetry(() => import('./pages/biolinks/BLPageEditor'));
 const DocAdminPage       = lazyRetry(() => import('./pages/docs/DocAdminPage'));
 
 //  WhatsApp Marketing 
@@ -339,6 +341,7 @@ export default function App() {
 
             {/* Public (no auth required) */}
             <Route path="/docs/public/:token" element={<ErrorBoundary><Suspense fallback={<Spinner />}><PublicSharePage /></Suspense></ErrorBoundary>} />
+            <Route path="/r/:slug" element={<ErrorBoundary><Suspense fallback={<Spinner />}><PublicBiolinkPage /></Suspense></ErrorBoundary>} />
 
             {/*  SEO Tools  */}
             <Route path="/seo" element={<Private><SEOHub /></Private>} />
@@ -367,6 +370,7 @@ export default function App() {
             {/*  BioLinks (URL shortener + QR)  */}
             <Route path="/biolinks" element={<Private><BioLinksHub /></Private>} />
             <Route path="/biolinks/pages" element={<Private><BiolinksPage /></Private>} />
+            <Route path="/biolinks/pages/:id/edit" element={<Private><BLPageEditor /></Private>} />
             <Route path="/biolinks/links" element={<Private><LinksPage /></Private>} />
             <Route path="/biolinks/tools" element={<Private><BLToolPages /></Private>} />
             <Route path="/biolinks/stats" element={<Private><BLDashboard /></Private>} />

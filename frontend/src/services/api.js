@@ -244,13 +244,26 @@ export const biolinksAPI = {
   createPage:       d       => api.post('/biolinks/links/biolink', d),
   updatePage:       (id,d)  => api.put(`/biolinks/links/${id}`, d),
   deletePage:       id      => api.delete(`/biolinks/links/${id}`),
+  toggleLink:       id      => api.patch(`/biolinks/links/${id}/toggle`),
   getLinks:         p       => api.get('/biolinks/links', { params: p }),
   createLink:       d       => api.post('/biolinks/links/short', d),
   updateLink:       (id,d)  => api.put(`/biolinks/links/${id}`, d),
   deleteLink:       id      => api.delete(`/biolinks/links/${id}`),
   generateQR:       d       => api.post('/biolinks/tools/qr', d),
   getLinkStats:     id      => api.get(`/biolinks/statistics/${id}`),
-  getStats:         ()      => api.get('/biolinks/statistics/overview'),
+  getStats:         ()      => api.get('/biolinks/stats/dashboard'),
+  // Blocks (biolink page content editor)
+  getBlocks:        linkId  => api.get(`/biolinks/biolinks/${linkId}/blocks`),
+  createBlock:      d       => api.post('/biolinks/blocks', d),
+  updateBlock:      (id,d)  => api.put(`/biolinks/blocks/${id}`, d),
+  deleteBlock:      id      => api.delete(`/biolinks/blocks/${id}`),
+  toggleBlock:      id      => api.patch(`/biolinks/blocks/${id}/toggle`),
+  reorderBlocks:    d       => api.put('/biolinks/blocks/reorder', d),
+  // QR codes
+  getQrCodes:       ()      => api.get('/biolinks/qr-codes'),
+  createQrCode:     d       => api.post('/biolinks/qr-codes', d),
+  updateQrCode:     (id,d)  => api.put(`/biolinks/qr-codes/${id}`, d),
+  deleteQrCode:     id      => api.delete(`/biolinks/qr-codes/${id}`),
 };
 
 //  Document Vault 
